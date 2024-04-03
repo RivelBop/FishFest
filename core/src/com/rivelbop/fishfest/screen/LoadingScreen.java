@@ -1,0 +1,75 @@
+package com.rivelbop.fishfest.screen;
+
+import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.rivelbop.fishfest.FishFest;
+import com.rivelbop.rivelworks.graphics2d.ShapeBatch;
+
+public class LoadingScreen implements Screen {
+    public FishFest game;
+    public AssetManager assets;
+    public ShapeBatch shapeBatch;
+
+    public final float BAR_WIDTH = 250f, BAR_HEIGHT = 100f;
+
+    public LoadingScreen(FishFest game) {
+        this.game = game;
+    }
+
+    @Override
+    public void show() {
+        game.camera.position.setZero();
+        game.camera.zoom = 1f;
+        shapeBatch = new ShapeBatch();
+
+        assets = game.assets;
+        assets.load("goldfish.png", Texture.class);
+        assets.load("rock.png", Texture.class);
+        assets.load("sharkJaw.png", Texture.class);
+    }
+
+    @Override
+    public void render(float v) {
+        game.camera.update();
+        shapeBatch.begin(ShapeRenderer.ShapeType.Filled);
+
+        shapeBatch.setColor(Color.LIGHT_GRAY);
+        shapeBatch.rect(0f, 0f, BAR_WIDTH, BAR_HEIGHT);
+        shapeBatch.setColor(Color.RED);
+        shapeBatch.rect(0f, 0f, BAR_WIDTH * game.assets.getProgress(), BAR_HEIGHT);
+
+        shapeBatch.end();
+
+        if (game.assets.update()) {
+            game.setScreen(new GameScreen(game));
+        }
+    }
+
+    @Override
+    public void resize(int i, int i1) {
+        game.viewport.update(i, i1);
+    }
+
+    @Override
+    public void pause() {
+        // USELESS
+    }
+
+    @Override
+    public void resume() {
+        // USELESS
+    }
+
+    @Override
+    public void hide() {
+        dispose();
+    }
+
+    @Override
+    public void dispose() {
+        shapeBatch.dispose();
+    }
+}
