@@ -78,7 +78,16 @@ public class FishFest extends Game {
     @Override
     public void dispose() {
         getScreen().dispose();
-		assets.dispose();
-		postProcessor.dispose();
+        assets.dispose();
+        postProcessor.dispose();
+    }
+
+    // Returns a random integer in the provided range
+    public static int randomInt(int min, int max) {
+        return (int) Math.floor(Math.random() * (max - min + 1) + min);
+    }
+
+    public static boolean randomBool() {
+        return randomInt(0, 1) == 1;
     }
 }

@@ -2,15 +2,23 @@ package com.rivelbop.fishfest.entity;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.utils.Array;
 import com.rivelbop.fishfest.screen.GameScreen;
 import com.rivelbop.rivelworks.physics2d.DynamicBody;
+import com.rivelbop.rivelworks.ui.Font;
 
 public class Player extends Entity {
-    private final DynamicBody body;
+    public final DynamicBody body;
+    private final Font healthText;
+    public Array<Wave> waves;
+    private float timer;
+    private final Sound shoot;
 
     public Player(GameScreen gameScreen) {
         super(gameScreen);
@@ -21,7 +29,12 @@ public class Player extends Entity {
         speed = 1500f;
 
         sprite = new Sprite(this.gameScreen.game.assets.get("goldfish.png", Texture.class));
-        sprite.scale(2f);
+
+        healthText = new Font(Gdx.files.internal("Minecraft.ttf"), 100, Color.WHITE);
+
+        waves = new Array<>();
+
+        shoot = Gdx.audio.newSound(Gdx.files.internal("click.wav"));
 
         body = new DynamicBody(this.gameScreen.world, new PolygonShape() {{
             setAsBox(sprite.getWidth(), sprite.getHeight());
@@ -36,6 +49,7 @@ public class Player extends Entity {
     }
 
     public void update() {
+        timer += Gdx.graphics.getDeltaTime();
         body.getBody().setLinearVelocity(0f, 0f);
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
             body.getBody().setLinearVelocity(body.getBody().getLinearVelocity().x, speed);
@@ -53,6 +67,50 @@ public class Player extends Entity {
         }
         sprite.setPosition(body.getBody().getPosition().x - sprite.getWidth() / 2f,
                 body.getBody().getPosition().y - sprite.getHeight() / 2f);
+
+        for (Wave w : waves) {
+            w.update();
+        }
+
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) && timer > 1f) {
+            waves.add(new Wave(1, sprite.getX(), sprite.getY()));
+            timer = 0f;
+            shoot.play();
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT) && timer > 1f) {
+            waves.add(new Wave(2, sprite.getX(), sprite.getY()));
+            timer = 0f;
+            shoot.play();
+        }
+
+        if (Gdx.input.isKeyPressed(Input.Keys.UP) && timer > 1f) {
+            waves.add(new Wave(3, sprite.getX(), sprite.getY()));
+            timer = 0f;
+            shoot.play();
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.DOWN) && timer > 1f) {
+            waves.add(new Wave(4, sprite.getX(), sprite.getY()));
+            timer = 0f;
+            shoot.play();
+        }
+
+
+    }
+
+    public void render(SpriteBatch batch) {
+        sprite.draw(batch);
+        for (Wave w : waves) {
+            w.render(batch);
+        }
+    }
+
+    public void renderBar() {
+        gameScreen.shapeRenderer.setColor(Color.RED);
+        gameScreen.shapeRenderer.rect(100f, 500f, health, 50f);
+    }
+
+    public void renderText(SpriteBatch batch) {
+        healthText.draw(batch, "Health: " + health, 50f, 50f);
     }
 
     public void isColliding(Entity entity) {

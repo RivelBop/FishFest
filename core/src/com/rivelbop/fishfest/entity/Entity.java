@@ -19,6 +19,8 @@ public abstract class Entity {
         sprite.draw(batch);
     }
 
+    public abstract void update();
+
     public Rectangle bounds() {
         return sprite.getBoundingRectangle();
     }
