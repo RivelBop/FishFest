@@ -21,7 +21,7 @@ public class WaveSystem {
         enemyChoiceList = new Array<Enemy>() {
             {
                 add(new MiniFish(gameScreen)); // All waves
-                add(new Scorpion(gameScreen)); // Waves 5 and up
+                add(new Lobster(gameScreen)); // Waves 5 and up
                 add(new EelFish(gameScreen)); // Waves 10 and up
                 add(new Octopus(gameScreen)); // Waves 20 and up
             }

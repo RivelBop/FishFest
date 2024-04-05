@@ -1,5 +1,7 @@
 package com.rivelbop.fishfest.entity;
 
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.rivelbop.fishfest.screen.GameScreen;
 
 public class EelFish extends Enemy {
@@ -9,6 +11,7 @@ public class EelFish extends Enemy {
         health = 25;
         damage = 10;
         speed = 200f;
+        sprite = new Sprite(this.gameScreen.game.assets.get("EelFish.png", Texture.class));
     }
 
     @Override

@@ -1,19 +1,28 @@
 package com.rivelbop.fishfest.screen;
 
+import box2dLight.RayHandler;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.Array;
+import com.rivelbop.fishfest.DamageText;
 import com.rivelbop.fishfest.FishFest;
+import com.rivelbop.fishfest.entity.Player;
 import com.rivelbop.fishfest.system.UpgradeSystem;
 import com.rivelbop.fishfest.system.WaveSystem;
-import com.rivelbop.fishfest.entity.Player;
+import com.rivelbop.rivelworks.graphics2d.ShapeBatch;
 import com.rivelbop.rivelworks.map2d.OrthogonalMap;
+import com.rivelbop.rivelworks.math.Interpolator;
 
 public class GameScreen implements Screen {
     private final float LERP = 7.5f;
@@ -23,7 +32,7 @@ public class GameScreen implements Screen {
 
     public SpriteBatch spriteBatch;
     public Box2DDebugRenderer box2DRenderer;
-    public ShapeRenderer shapeRenderer;
+    public ShapeBatch shapeRenderer;
 
     public World world;
     public OrthogonalMap map;
@@ -31,6 +40,10 @@ public class GameScreen implements Screen {
     public UpgradeSystem upgradeSystem;
     public Player player;
     public WaveSystem waveSystem;
+    public Interpolator startFade;
+    public Sprite fadeBox;
+
+    public Array<DamageText> damageTexts;
 
     public GameScreen(FishFest game) {
         this.game = game;
@@ -42,12 +55,16 @@ public class GameScreen implements Screen {
         music.play();
         music.setLooping(true);
 
+        fadeBox = new Sprite(game.assets.get("fadeBox.png", Texture.class));
+        fadeBox.setAlpha(1f);
+        startFade = new Interpolator(Interpolation.fade, 1f);
+
         game.camera.position.setZero();
         game.camera.zoom = 0.33f;
 
         spriteBatch = new SpriteBatch();
         box2DRenderer = new Box2DDebugRenderer();
-        shapeRenderer = new ShapeRenderer();
+        shapeRenderer = new ShapeBatch();
 
         world = new World(new Vector2(0f, 0f), true);
         map = new OrthogonalMap("MapforGameJamImproved.tmx");
@@ -57,11 +74,16 @@ public class GameScreen implements Screen {
         player = new Player(this);
         player.body.getBody().setTransform(200f, 200f, 0f);
         waveSystem = new WaveSystem(this);
+
+        damageTexts = new Array<>();
+
     }
 
     @Override
     public void render(float v) {
-        if(!upgradeSystem.update()) {
+        fadeBox.setAlpha(startFade.update());
+
+        if (!upgradeSystem.update()) {
             world.step(1 / 60f, 6, 2);
             player.update();
             waveSystem.update();
@@ -80,13 +102,24 @@ public class GameScreen implements Screen {
         player.renderText(spriteBatch);
         player.render(spriteBatch);
         waveSystem.render(spriteBatch);
+        for(DamageText t : damageTexts) {
+            t.render(spriteBatch);
+        }
         spriteBatch.end();
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         player.renderBar();
+        shapeRenderer.setColor(0f,0f,0.7f, 0.3f);
+        shapeRenderer.rect(0f, 0f, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         shapeRenderer.end();
 
         upgradeSystem.render();
+
+        /*
+        if(player.health <= 0f) {
+            game.setScreen(new DeathMenu(game));
+        }
+         */
     }
 
 

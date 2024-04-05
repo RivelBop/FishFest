@@ -11,7 +11,7 @@ public class Octopus extends Enemy {
         health = 70;
         damage = 10;
         speed = 150f;
-        sprite = new Sprite(new Texture("badlogic.jpg"));
+        sprite = new Sprite(this.gameScreen.game.assets.get("Octopus.png", Texture.class));
     }
 
     @Override

@@ -2,8 +2,11 @@ package com.rivelbop.fishfest.screen;
 
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGeneratorLoader;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.rivelbop.fishfest.FishFest;
 import com.rivelbop.rivelworks.graphics2d.ShapeBatch;
@@ -29,6 +32,20 @@ public class LoadingScreen implements Screen {
         assets.load("goldfish.png", Texture.class);
         assets.load("rock.png", Texture.class);
         assets.load("sharkJaw.png", Texture.class);
+        assets.load("EelFish.png", Texture.class);
+        assets.load("Lobster.png", Texture.class);
+        assets.load("Octopus.png", Texture.class);
+        assets.load("MiniFish.png", Texture.class);
+        assets.load("Xp.png", Texture.class);
+        assets.load("fadeBox.png", Texture.class);
+
+        assets.setLoader(
+                FreeTypeFontGenerator.class,
+                new FreeTypeFontGeneratorLoader(
+                        new InternalFileHandleResolver()
+                )
+        );
+        assets.load("font.ttf", FreeTypeFontGenerator.class);
     }
 
     @Override
@@ -44,7 +61,7 @@ public class LoadingScreen implements Screen {
         shapeBatch.end();
 
         if (game.assets.update()) {
-            game.setScreen(new GameScreen(game));
+            game.setScreen(new MainMenu(game));
         }
     }
 

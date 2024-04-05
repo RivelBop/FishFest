@@ -12,7 +12,7 @@ public class MiniFish extends Enemy {
         health = 35;
         damage = 20;
         speed = 100f;
-        sprite = new Sprite(new Texture("badlogic.jpg"));
+        sprite = new Sprite(this.gameScreen.game.assets.get("MiniFish.png", Texture.class));
     }
 
     @Override
