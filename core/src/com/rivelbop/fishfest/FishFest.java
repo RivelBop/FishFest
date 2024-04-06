@@ -23,7 +23,7 @@ public class FishFest extends Game {
 
     @Override
     public void create() {
-        //Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+        // Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 
         camera = new OrthographicCamera();
         viewport = new StretchViewport(WIDTH, HEIGHT, camera);
@@ -63,6 +63,7 @@ public class FishFest extends Game {
         postProcessor.addEffect(curvature);
 
         assets = new AssetManager();
+
         setScreen(new LoadingScreen(this));
     }
 

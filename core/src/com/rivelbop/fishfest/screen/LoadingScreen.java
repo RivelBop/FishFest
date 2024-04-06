@@ -29,6 +29,13 @@ public class LoadingScreen implements Screen {
         shapeBatch = new ShapeBatch();
 
         assets = game.assets;
+        assets.setLoader(
+                FreeTypeFontGenerator.class,
+                new FreeTypeFontGeneratorLoader(
+                        new InternalFileHandleResolver()
+                )
+        );
+
         assets.load("goldfish.png", Texture.class);
         assets.load("rock.png", Texture.class);
         assets.load("sharkJaw.png", Texture.class);
@@ -38,13 +45,15 @@ public class LoadingScreen implements Screen {
         assets.load("MiniFish.png", Texture.class);
         assets.load("Xp.png", Texture.class);
         assets.load("fadeBox.png", Texture.class);
-
-        assets.setLoader(
-                FreeTypeFontGenerator.class,
-                new FreeTypeFontGeneratorLoader(
-                        new InternalFileHandleResolver()
-                )
-        );
+        assets.load("Wave.png", Texture.class);
+        assets.load("Heart.png", Texture.class);
+        assets.load("bomb.png", Texture.class);
+        assets.load("alldir.png", Texture.class);
+        assets.load("bombUpgrade.png", Texture.class);
+        assets.load("Ink.png", Texture.class);
+        assets.load("SpeedBuff.png", Texture.class);
+        assets.load("fireRate.png", Texture.class);
+        assets.load("bulletSpeed.png", Texture.class);
         assets.load("font.ttf", FreeTypeFontGenerator.class);
     }
 

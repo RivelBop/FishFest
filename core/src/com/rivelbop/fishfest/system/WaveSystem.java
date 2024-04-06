@@ -20,7 +20,7 @@ public class WaveSystem {
         this.gameScreen = game;
         enemyChoiceList = new Array<Enemy>() {
             {
-                add(new MiniFish(gameScreen)); // All waves
+                add(new MiniFish(gameScreen)); // All waves - MiniFish
                 add(new Lobster(gameScreen)); // Waves 5 and up
                 add(new EelFish(gameScreen)); // Waves 10 and up
                 add(new Octopus(gameScreen)); // Waves 20 and up
@@ -40,7 +40,7 @@ public class WaveSystem {
         if (timerCheck() && tempCount < count) {
             tempCount++;
 
-            int enemyCount = randomInt(5, 25);
+            int enemyCount = randomInt(5, 17);
             for (int i = 0; i < enemyCount; i++) {
                 Enemy enemy = enemyChoiceList.get(randomInt(0,
                         (count < 5) ? 0 :
@@ -48,19 +48,14 @@ public class WaveSystem {
                                         (count < 20) ? 2 : 3
                 )).create(gameScreen);
 
-                enemy.sprite.setPosition(randomInt(-1000, 1000), randomInt(-1000, 1000));
+                enemy.speed += randomInt(-15, 15);
+                do {
+                    enemy.sprite.setPosition(randomInt(-1000, 1000), randomInt(-1000, 1000));
+                } while (enemy.bounds().overlaps(gameScreen.player.bounds()));
                 currentEnemies.add(enemy);
             }
         }
 
-        // Make this into a regular for loop
-        // Update all the enemies
-        // After updating check their health and remove them if they are dead
-        /*for (Enemy e : currentEnemies) {
-            e.update();
-        }
-
-         */
         for (int i = 0; i < currentEnemies.size; i++) {
             currentEnemies.get(i).update();
             if (currentEnemies.get(i).health <= 0f) {
@@ -77,16 +72,16 @@ public class WaveSystem {
     }
 
     private boolean timerCheck() {
-        if (count < 5 && spawnTimer >= 6f) {
+        if (count < 5 && spawnTimer >= 8f) {
             spawnTimer = 0f;
             return true;
-        } else if (count >= 5 && count < 10 && spawnTimer >= 5f) {
+        } else if (count >= 5 && count < 10 && spawnTimer >= 8f) {
             spawnTimer = 0f;
             return true;
-        } else if (count >= 10 && count < 20 && spawnTimer >= 4f) {
+        } else if (count >= 10 && count < 20 && spawnTimer >= 7f) {
             spawnTimer = 0f;
             return true;
-        } else if (count >= 20 && spawnTimer >= 3f) {
+        } else if (count >= 20 && spawnTimer >= 6.5f) {
             spawnTimer = 0f;
             return true;
         }

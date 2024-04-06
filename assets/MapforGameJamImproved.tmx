@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="60" height="40" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="71">
  <tileset firstgid="1" name="tilesetforFishGameJam" tilewidth="16" tileheight="16" tilecount="90" columns="10">
-  <image source="tilesetforFishGameJam.png" width="160" height="144"/>
+  <image source="TileSet.png" width="160" height="144"/>
  </tileset>
  <layer id="1" name="Tile Layer 1" width="60" height="40">
   <data encoding="csv">

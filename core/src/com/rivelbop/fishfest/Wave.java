@@ -4,33 +4,42 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.rivelbop.fishfest.screen.GameScreen;
 
 public class Wave {
+    private static Texture texture;
+    private float speed;
     public Sprite sprite;
     private final int direction;
 
-    public Wave(int direction, float positionx, float positiony) {
+    public Wave(GameScreen gameScreen, int direction, float positionx, float positiony, int level) {
         this.direction = direction;
-        sprite = new Sprite(new Texture("Wave.png"));
+
+        if(texture == null) {
+            texture = gameScreen.game.assets.get("Wave.png", Texture.class);
+        }
+        sprite = new Sprite(texture);
         sprite.setPosition(positionx, positiony);
+
+        speed = 200f + (level * 50f);
     }
 
     public void update() {
         switch (direction) {
             case 1:
-                sprite.translateX(200 * Gdx.graphics.getDeltaTime());
+                sprite.translateX(speed * Gdx.graphics.getDeltaTime());
                 sprite.setFlip(false, false);
                 break;
             case 2:
-                sprite.translateX(-200 * Gdx.graphics.getDeltaTime());
+                sprite.translateX(-speed * Gdx.graphics.getDeltaTime());
                 sprite.setFlip(true, false);
                 break;
             case 3:
-                sprite.translateY(200 * Gdx.graphics.getDeltaTime());
+                sprite.translateY(speed * Gdx.graphics.getDeltaTime());
                 sprite.setRotation(90f);
                 break;
             case 4:
-                sprite.translateY(-200 * Gdx.graphics.getDeltaTime());
+                sprite.translateY(-speed * Gdx.graphics.getDeltaTime());
                 sprite.setRotation(-90f);
         }
     }

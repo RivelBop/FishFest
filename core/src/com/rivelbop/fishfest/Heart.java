@@ -4,12 +4,17 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.rivelbop.fishfest.screen.GameScreen;
 
 public class Heart {
+    private static Texture texture;
     public Sprite sprite;
 
-    public Heart(float positionX, float positionY) {
-        sprite = new Sprite(new Texture(Gdx.files.internal("Heart.png")));
+    public Heart(GameScreen gameScreen, float positionX, float positionY) {
+        if(texture == null) {
+            texture = gameScreen.game.assets.get("Heart.png", Texture.class);
+        }
+        sprite = new Sprite(texture);
         sprite.setPosition(positionX, positionY);
     }
 

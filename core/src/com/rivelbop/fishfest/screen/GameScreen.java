@@ -1,15 +1,14 @@
 package com.rivelbop.fishfest.screen;
 
-import box2dLight.RayHandler;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Interpolation;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
@@ -17,12 +16,14 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.rivelbop.fishfest.DamageText;
 import com.rivelbop.fishfest.FishFest;
+import com.rivelbop.fishfest.Wave;
 import com.rivelbop.fishfest.entity.Player;
 import com.rivelbop.fishfest.system.UpgradeSystem;
 import com.rivelbop.fishfest.system.WaveSystem;
 import com.rivelbop.rivelworks.graphics2d.ShapeBatch;
 import com.rivelbop.rivelworks.map2d.OrthogonalMap;
 import com.rivelbop.rivelworks.math.Interpolator;
+import com.rivelbop.rivelworks.ui.Font;
 
 public class GameScreen implements Screen {
     private final float LERP = 7.5f;
@@ -30,7 +31,7 @@ public class GameScreen implements Screen {
 
     public FishFest game;
 
-    public SpriteBatch spriteBatch;
+    public SpriteBatch spriteBatch, uiBatch;
     public Box2DDebugRenderer box2DRenderer;
     public ShapeBatch shapeRenderer;
 
@@ -40,8 +41,11 @@ public class GameScreen implements Screen {
     public UpgradeSystem upgradeSystem;
     public Player player;
     public WaveSystem waveSystem;
-    public Interpolator startFade;
-    public Sprite fadeBox;
+    public Font textWave;
+
+    public Sprite spriteBox;
+    public Interpolator fadeOut, fadeIn;
+    public boolean isDead;
 
     public Array<DamageText> damageTexts;
 
@@ -55,71 +59,111 @@ public class GameScreen implements Screen {
         music.play();
         music.setLooping(true);
 
-        fadeBox = new Sprite(game.assets.get("fadeBox.png", Texture.class));
-        fadeBox.setAlpha(1f);
-        startFade = new Interpolator(Interpolation.fade, 1f);
-
         game.camera.position.setZero();
         game.camera.zoom = 0.33f;
 
+        spriteBox = new Sprite(game.assets.get("fadeBox.png", Texture.class));
+        spriteBox.setAlpha(1f);
+        spriteBox.setSize(FishFest.WIDTH, FishFest.HEIGHT);
+        fadeOut = new Interpolator(Interpolation.fade, 1f);
+        fadeIn = new Interpolator(Interpolation.fade, 1f);
+
         spriteBatch = new SpriteBatch();
+        uiBatch = new SpriteBatch();
         box2DRenderer = new Box2DDebugRenderer();
         shapeRenderer = new ShapeBatch();
 
         world = new World(new Vector2(0f, 0f), true);
-        map = new OrthogonalMap("MapforGameJamImproved.tmx");
-        map.staticBodyToPhysicsWorld(3, world);
+        map = new OrthogonalMap("MapThing.tmx");
+        map.staticBodyToPhysicsWorld(6, world);
 
         upgradeSystem = new UpgradeSystem(this);
         player = new Player(this);
         player.body.getBody().setTransform(200f, 200f, 0f);
         waveSystem = new WaveSystem(this);
+        textWave = new Font(Gdx.files.internal("font.ttf"), 25, Color.FOREST);
 
         damageTexts = new Array<>();
-
     }
 
     @Override
     public void render(float v) {
-        fadeBox.setAlpha(startFade.update());
+        spriteBox.setAlpha(1f - fadeOut.update());
+        if (isDead) {
+            spriteBox.setAlpha(fadeIn.update());
+        }
 
         if (!upgradeSystem.update()) {
             world.step(1 / 60f, 6, 2);
             player.update();
+            if(player.health <= 0f) {
+                isDead = true;
+            }
             waveSystem.update();
+
+            for (int i = 0; i < player.waves.size; i++) {
+                Wave w = player.waves.get(i);
+                if (w.sprite.getX() + w.sprite.getWidth() < game.camera.position.x - FishFest.WIDTH) {
+                    player.waves.removeIndex(i);
+                    i--;
+                    continue;
+                }
+
+                if (w.sprite.getX() > game.camera.position.x + FishFest.WIDTH) {
+                    player.waves.removeIndex(i);
+                    i--;
+                    continue;
+                }
+
+                if (w.sprite.getY() + w.sprite.getHeight() < game.camera.position.y - FishFest.HEIGHT) {
+                    player.waves.removeIndex(i);
+                    i--;
+                    continue;
+                }
+
+                if (w.sprite.getY() > game.camera.position.y + FishFest.HEIGHT) {
+                    player.waves.removeIndex(i);
+                    i--;
+                }
+            }
         }
 
         Vector3 position = game.camera.position;
         position.x += (player.centerX() - position.x) * LERP * Gdx.graphics.getDeltaTime();
         position.y += (player.centerY() - position.y) * LERP * Gdx.graphics.getDeltaTime();
+        player.cameraShake.origPosition.set(game.camera.position.x, game.camera.position.y, 0f);
+        player.cameraShake.update(Gdx.graphics.getDeltaTime());
         game.camera.update();
 
         map.render(game.camera);
         box2DRenderer.render(world, game.camera.combined);
 
-        spriteBatch.setProjectionMatrix(game.camera.combined);
-        spriteBatch.begin();
-        player.renderText(spriteBatch);
-        player.render(spriteBatch);
-        waveSystem.render(spriteBatch);
-        for(DamageText t : damageTexts) {
-            t.render(spriteBatch);
-        }
-        spriteBatch.end();
-
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         player.renderBar();
-        shapeRenderer.setColor(0f,0f,0.7f, 0.3f);
+        shapeRenderer.setColor(0f, 0f, 0.7f, 0.3f);
         shapeRenderer.rect(0f, 0f, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         shapeRenderer.end();
 
+        spriteBatch.setProjectionMatrix(game.camera.combined);
+        spriteBatch.begin();
+        player.render(spriteBatch);
+        waveSystem.render(spriteBatch);
+        for (DamageText t : damageTexts) {
+            t.render(spriteBatch);
+        }
+        spriteBatch.end();
+        
+        uiBatch.begin();
+        player.renderText(uiBatch);
+        textWave.drawCenter(uiBatch, "Wave: " + waveSystem.count, 50f, 50f);
+        spriteBox.draw(uiBatch);
+        uiBatch.end();
+
         upgradeSystem.render();
 
-        /*
-        if(player.health <= 0f) {
+        if (fadeIn.isComplete()) {
             game.setScreen(new DeathMenu(game));
         }
-         */
     }
 
 
@@ -146,6 +190,7 @@ public class GameScreen implements Screen {
     @Override
     public void dispose() {
         spriteBatch.dispose();
+        uiBatch.dispose();
         box2DRenderer.dispose();
         shapeRenderer.dispose();
 

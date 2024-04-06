@@ -22,9 +22,13 @@ public class Player extends Entity {
     public Array<Bomb> bombs;
     public Array<Xp> xps;
     public Array<Heart> hearts;
+    public Array<SpeedBuff> speedBuffs;
 
-    private float timer, timeShooterUpgrade, bombTimer, bombDetination;
+    private float shootCoolDown = 1f;
+    private float timer, damageTimer, timeShooterUpgrade, bombTimer, bombDetination;
+    public boolean hasTakenDamage, inked;
     private final Sound shoot;
+    public CameraShaker cameraShake;
 
     public Player(GameScreen gameScreen) {
         super(gameScreen);
@@ -35,13 +39,14 @@ public class Player extends Entity {
         speed = 1500f;
 
         sprite = new Sprite(this.gameScreen.game.assets.get("goldfish.png", Texture.class));
-
-        healthText = new Font(Gdx.files.internal("Minecraft.ttf"), 100, Color.WHITE);
+        cameraShake = new CameraShaker(gameScreen.game.camera, 5f, 5f, 10f);
+        healthText = new Font(Gdx.files.internal("Minecraft.ttf"), 35, Color.WHITE);
 
         waves = new Array<>();
         bombs = new Array<>();
         xps = new Array<>();
         hearts = new Array<>();
+        speedBuffs = new Array<>();
 
         shoot = Gdx.audio.newSound(Gdx.files.internal("click.wav"));
 
@@ -59,24 +64,27 @@ public class Player extends Entity {
 
     public void update() {
         timer += Gdx.graphics.getDeltaTime();
-        timeShooterUpgrade += Gdx.graphics.getDeltaTime();
         bombTimer += Gdx.graphics.getDeltaTime();
 
         body.getBody().setLinearVelocity(0f, 0f);
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
             body.getBody().setLinearVelocity(body.getBody().getLinearVelocity().x, speed);
         }
+
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
             body.getBody().setLinearVelocity(-speed, body.getBody().getLinearVelocity().y);
             sprite.setFlip(true, false);
         }
+
         if (Gdx.input.isKeyPressed(Input.Keys.S)) {
             body.getBody().setLinearVelocity(body.getBody().getLinearVelocity().x, -speed);
         }
+
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
             body.getBody().setLinearVelocity(speed, body.getBody().getLinearVelocity().y);
             sprite.setFlip(false, false);
         }
+
         sprite.setPosition(body.getBody().getPosition().x - sprite.getWidth() / 2f,
                 body.getBody().getPosition().y - sprite.getHeight() / 2f);
 
@@ -84,41 +92,66 @@ public class Player extends Entity {
             w.update();
         }
 
-        for (Bomb b : bombs) {
-            b.update();
+        for (int i = 0; i < bombs.size; i++) {
+            bombs.get(i).update();
+            if(bombs.get(i).exploded) {
+                bombs.removeIndex(i);
+                i--;
+            }
         }
 
-        if (timeShooterUpgrade >= 1f) {
-            waves.add(new Wave(1, sprite.getX(), sprite.getY()));
-            waves.add(new Wave(2, sprite.getX(), sprite.getY()));
-            waves.add(new Wave(3, sprite.getX(), sprite.getY()));
-            waves.add(new Wave(4, sprite.getX(), sprite.getY()));
-            timeShooterUpgrade = 0f;
+        if(gameScreen.upgradeSystem.upgrades[2].unlocked) {
+            shootCoolDown = (100f - 10f * gameScreen.upgradeSystem.upgrades[2].level) / 100f;
+
+            if(shootCoolDown < 0f) {
+                shootCoolDown = 0f;
+            }
         }
 
-        /*if(bombTimer >= 3f) {
-            bombs.add(new Bomb(sprite.getX(), sprite.getY()));
+        if(gameScreen.upgradeSystem.upgrades[0].unlocked) {
+            timeShooterUpgrade += Gdx.graphics.getDeltaTime();
+
+            int upgrade = gameScreen.upgradeSystem.upgrades[0].level;
+            if (timeShooterUpgrade >= shootCoolDown) {
+                waves.add(new Wave(gameScreen, 1, sprite.getX(), sprite.getY(), upgrade));
+                waves.add(new Wave(gameScreen, 2, sprite.getX(), sprite.getY(), upgrade));
+                waves.add(new Wave(gameScreen, 3, sprite.getX(), sprite.getY(), upgrade));
+                waves.add(new Wave(gameScreen, 4, sprite.getX(), sprite.getY(), upgrade));
+                timeShooterUpgrade = 0f;
+                cameraShake.resetAndReconfigure(2f,2f,5f);
+                cameraShake.startShaking();
+            }
+        }
+
+        if (bombTimer >= 3f) {
+            bombs.add(new Bomb(gameScreen, sprite.getX(), sprite.getY()));
             bombTimer = 0f;
-        }*/
-
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) && timer > 1f) {
-            waves.add(new Wave(1, sprite.getX(), sprite.getY()));
-            timer = 0f;
-            shoot.play();
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT) && timer > 1f) {
-            waves.add(new Wave(2, sprite.getX(), sprite.getY()));
+
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) && timer > shootCoolDown) {
+            waves.add(new Wave(gameScreen, 1, sprite.getX(), sprite.getY(),
+                    gameScreen.upgradeSystem.upgrades[3].unlocked ? gameScreen.upgradeSystem.upgrades[3].level : 0));
             timer = 0f;
             shoot.play();
         }
 
-        if (Gdx.input.isKeyPressed(Input.Keys.UP) && timer > 1f) {
-            waves.add(new Wave(3, sprite.getX(), sprite.getY()));
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT) && timer > shootCoolDown) {
+            waves.add(new Wave(gameScreen, 2, sprite.getX(), sprite.getY(),
+                    gameScreen.upgradeSystem.upgrades[3].unlocked ? gameScreen.upgradeSystem.upgrades[3].level : 0));
             timer = 0f;
             shoot.play();
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.DOWN) && timer > 1f) {
-            waves.add(new Wave(4, sprite.getX(), sprite.getY()));
+
+        if (Gdx.input.isKeyPressed(Input.Keys.UP) && timer > shootCoolDown) {
+            waves.add(new Wave(gameScreen, 3, sprite.getX(), sprite.getY(),
+                    gameScreen.upgradeSystem.upgrades[3].unlocked ? gameScreen.upgradeSystem.upgrades[3].level : 0));
+            timer = 0f;
+            shoot.play();
+        }
+
+        if (Gdx.input.isKeyPressed(Input.Keys.DOWN) && timer > shootCoolDown) {
+            waves.add(new Wave(gameScreen, 4, sprite.getX(), sprite.getY(),
+                    gameScreen.upgradeSystem.upgrades[3].unlocked ? gameScreen.upgradeSystem.upgrades[3].level : 0));
             timer = 0f;
             shoot.play();
         }
@@ -126,7 +159,7 @@ public class Player extends Entity {
         for (int i = 0; i < xps.size; i++) {
             Xp x = xps.get(i);
             if (sprite.getBoundingRectangle().overlaps(x.sprite.getBoundingRectangle())) {
-                gameScreen.upgradeSystem.xp += 3f;
+                gameScreen.upgradeSystem.xp += 15f;
                 xps.removeIndex(i);
                 i--;
             }
@@ -141,6 +174,30 @@ public class Player extends Entity {
                     health = maxHealth;
                 }
                 i--;
+            }
+        }
+
+        for (int i = 0; i < speedBuffs.size; i++) {
+            SpeedBuff s = speedBuffs.get(i);
+            if (sprite.getBoundingRectangle().overlaps(s.sprite.getBoundingRectangle())) {
+                speedBuffs.removeIndex(i);
+                speed = 2500f;
+                sprite.setColor(Color.GREEN);
+                i--;
+            }
+        }
+
+        if(hasTakenDamage) {
+            if(damageTimer == 0f) {
+                cameraShake.resetAndReconfigure(5f,5f,10f);
+                cameraShake.startShaking();
+            }
+            damageTimer += Gdx.graphics.getDeltaTime();
+
+            if(damageTimer >= 1f) {
+                damageTimer = 0f;
+                hasTakenDamage = false;
+                speed = 1500f;
             }
         }
     }
@@ -159,15 +216,21 @@ public class Player extends Entity {
         for (Heart h : hearts) {
             h.render(batch);
         }
+        for(SpeedBuff s : speedBuffs) {
+            s.render(batch);
+        }
+
     }
 
     public void renderBar() {
+        gameScreen.shapeRenderer.setColor(Color.GRAY);
+        gameScreen.shapeRenderer.rect(50f, 600f, 500f, 75f);
         gameScreen.shapeRenderer.setColor(Color.RED);
-        gameScreen.shapeRenderer.rect(100f, 500f, health, 50f);
+        gameScreen.shapeRenderer.rect(50f, 600f, 500f * ((float) health / maxHealth), 75f);
     }
 
     public void renderText(SpriteBatch batch) {
-        healthText.draw(batch, "Health: " + health, 50f, 50f);
+        healthText.drawCenter(batch, "Health: " + health, 300f, 665f);
     }
 
     public void isColliding(Entity entity) {

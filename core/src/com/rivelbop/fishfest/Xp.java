@@ -6,10 +6,14 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.rivelbop.fishfest.screen.GameScreen;
 
 public class Xp {
+    private static Texture texture;
     public Sprite sprite;
 
     public Xp(GameScreen gameScreen, float positionX, float positionY) {
-        sprite = new Sprite(gameScreen.game.assets.get("Xp.png", Texture.class));
+        if(texture == null) {
+            texture = gameScreen.game.assets.get("Xp.png", Texture.class);
+        }
+        sprite = new Sprite(texture);
         sprite.setPosition(positionX, positionY);
     }
 

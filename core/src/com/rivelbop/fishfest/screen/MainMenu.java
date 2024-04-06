@@ -14,7 +14,6 @@ import com.rivelbop.rivelworks.math.Interpolator;
 import com.rivelbop.rivelworks.ui.Font;
 
 public class MainMenu implements Screen {
-
     public FishFest game;
     public Font font;
     public SpriteBatch uiBatch;
@@ -25,7 +24,6 @@ public class MainMenu implements Screen {
     public MainMenu(FishFest game) {
         this.game = game;
     }
-
 
     @Override
     public void show() {
@@ -49,7 +47,7 @@ public class MainMenu implements Screen {
             spacePressed = true;
         }
 
-        if(spacePressed) {
+        if (spacePressed) {
             spriteBox.setAlpha(fadeIn.update());
         }
 
@@ -58,10 +56,9 @@ public class MainMenu implements Screen {
         spriteBox.draw(uiBatch);
         uiBatch.end();
 
-        if(fadeIn.isComplete()) {
+        if (fadeIn.isComplete()) {
             game.setScreen(new GameScreen(game));
         }
-
     }
 
     @Override
@@ -86,6 +83,6 @@ public class MainMenu implements Screen {
 
     @Override
     public void dispose() {
-
+        uiBatch.dispose();
     }
 }

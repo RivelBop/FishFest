@@ -4,15 +4,22 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.math.Interpolation;
 import com.rivelbop.fishfest.FishFest;
+import com.rivelbop.rivelworks.math.Interpolator;
 import com.rivelbop.rivelworks.ui.Font;
 
 public class DeathMenu implements Screen {
     public FishFest game;
-    public Font header;
-    public Font deadText;
+    public Font header, deadText;
     public SpriteBatch uiBatch;
+    public Sprite spriteBox;
+    public Interpolator fadeOut, fadeIn;
+    public boolean spacePressed;
 
     public DeathMenu(FishFest game) {
         this.game = game;
@@ -24,20 +31,38 @@ public class DeathMenu implements Screen {
         game.camera.zoom = 1f;
         uiBatch = new SpriteBatch();
 
-        header = new Font(Gdx.files.internal("font.ttf"), 30, Color.RED);
-        deadText = new Font(Gdx.files.internal("font.ttf"), 50, Color.GREEN);
+        header = new Font(game.assets.get("font.ttf", FreeTypeFontGenerator.class), 30, Color.RED);
+        deadText = new Font(game.assets.get("font.ttf", FreeTypeFontGenerator.class), 50, Color.GREEN);
+
+        fadeOut = new Interpolator(Interpolation.fade, 1f);
+        fadeIn = new Interpolator(Interpolation.fade, 1f);
+
+        spriteBox = new Sprite(game.assets.get("fadeBox.png", Texture.class));
+        spriteBox.setAlpha(1f);
+        spriteBox.setSize(FishFest.WIDTH, FishFest.HEIGHT);
     }
 
     @Override
     public void render(float v) {
-        if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
-            game.setScreen(new GameScreen(game));
+        spriteBox.setAlpha(1f - fadeOut.update());
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && fadeOut.isComplete()) {
+            spacePressed = true;
+        }
+
+        if (spacePressed) {
+            spriteBox.setAlpha(fadeIn.update());
         }
 
         uiBatch.begin();
         header.drawCenter(uiBatch, "You Died!!!", 650f, 700f);
         deadText.drawCenter(uiBatch, "Press Space To Play Again", 650f, 200f);
+        spriteBox.draw(uiBatch);
         uiBatch.end();
+
+        if (fadeIn.isComplete()) {
+            game.setScreen(new GameScreen(game));
+        }
     }
 
     @Override
@@ -62,6 +87,6 @@ public class DeathMenu implements Screen {
 
     @Override
     public void dispose() {
-
+        uiBatch.dispose();
     }
 }
