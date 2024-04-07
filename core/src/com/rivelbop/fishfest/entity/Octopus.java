@@ -96,7 +96,13 @@ public class Octopus extends Enemy {
         }
     }
 
-    private void checkCollision() {
+    protected void checkCollision() {
+        for(Bomb b : gameScreen.player.bombs) {
+            if(b.rect.overlaps(bounds())) {
+                health = 0;
+            }
+        }
+
         for (int i = 0; i < gameScreen.player.waves.size; i++) {
             Wave w = gameScreen.player.waves.get(i);
             if (w.sprite.getBoundingRectangle().overlaps(bounds())) {

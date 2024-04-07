@@ -2,6 +2,7 @@ package com.rivelbop.fishfest.screen;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -20,6 +21,7 @@ public class MainMenu implements Screen {
     public Interpolator fadeOut, fadeIn;
     public Sprite spriteBox;
     boolean spacePressed;
+    private int highScore;
 
     public MainMenu(FishFest game) {
         this.game = game;
@@ -37,6 +39,10 @@ public class MainMenu implements Screen {
         spriteBox = new Sprite(game.assets.get("fadeBox.png", Texture.class));
         spriteBox.setAlpha(1f);
         spriteBox.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
+        Preferences save = Gdx.app.getPreferences("FishFestSave");
+        highScore = save.getInteger("highscore", 0);
+        save.flush();
     }
 
     @Override
@@ -52,6 +58,7 @@ public class MainMenu implements Screen {
         }
 
         uiBatch.begin();
+        font.drawCenter(uiBatch, "Highscore: " + highScore, FishFest.WIDTH / 2f, FishFest.HEIGHT - 100f);
         font.drawCenter(uiBatch, "Press Space To Start", 650f, 200f);
         spriteBox.draw(uiBatch);
         uiBatch.end();

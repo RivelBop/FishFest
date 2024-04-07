@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.physics.box2d.Box2D;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.utils.Array;
 import com.rivelbop.fishfest.*;
@@ -25,8 +26,8 @@ public class Player extends Entity {
     public Array<SpeedBuff> speedBuffs;
 
     private float shootCoolDown = 1f;
-    private float timer, damageTimer, timeShooterUpgrade, bombTimer, bombDetination;
-    public boolean hasTakenDamage, inked;
+    private float timer, damageTimer, timeShooterUpgrade, bombTimer, bombDetination, speedTimer;
+    public boolean hasTakenDamage, inked, hasSpeed;
     private final Sound shoot;
     public CameraShaker cameraShake;
 
@@ -36,7 +37,7 @@ public class Player extends Entity {
         maxHealth = 100;
         health = 100;
         damage = 15;
-        speed = 1500f;
+        speed = 100000f;
 
         sprite = new Sprite(this.gameScreen.game.assets.get("goldfish.png", Texture.class));
         cameraShake = new CameraShaker(gameScreen.game.camera, 5f, 5f, 10f);
@@ -49,7 +50,6 @@ public class Player extends Entity {
         speedBuffs = new Array<>();
 
         shoot = Gdx.audio.newSound(Gdx.files.internal("click.wav"));
-
         body = new DynamicBody(this.gameScreen.world, new PolygonShape() {{
             setAsBox(sprite.getWidth() / 2f, sprite.getHeight() / 2f);
         }}, 0.1f, 0f, 0f);
@@ -63,8 +63,9 @@ public class Player extends Entity {
     }
 
     public void update() {
+        System.out.println(body.getBody().getLinearVelocity());
+        System.out.println(bombs.size);
         timer += Gdx.graphics.getDeltaTime();
-        bombTimer += Gdx.graphics.getDeltaTime();
 
         body.getBody().setLinearVelocity(0f, 0f);
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
@@ -94,13 +95,17 @@ public class Player extends Entity {
 
         for (int i = 0; i < bombs.size; i++) {
             bombs.get(i).update();
-            if(bombs.get(i).exploded) {
+            Bomb b = bombs.get(i);
+            if(bombs.get(i).exploded && b.bombTimer >= 2f) {
                 bombs.removeIndex(i);
                 i--;
             }
         }
 
         if(gameScreen.upgradeSystem.upgrades[2].unlocked) {
+            if(gameScreen.upgradeSystem.upgrades[2].level > 5) {
+                gameScreen.upgradeSystem.upgrades[2].level = 5;
+            }
             shootCoolDown = (100f - 10f * gameScreen.upgradeSystem.upgrades[2].level) / 100f;
 
             if(shootCoolDown < 0f) {
@@ -123,9 +128,12 @@ public class Player extends Entity {
             }
         }
 
-        if (bombTimer >= 3f) {
-            bombs.add(new Bomb(gameScreen, sprite.getX(), sprite.getY()));
-            bombTimer = 0f;
+        if(gameScreen.upgradeSystem.upgrades[1].unlocked) {
+            bombTimer += Gdx.graphics.getDeltaTime();
+            if (bombTimer >= 3f) {
+                bombs.add(new Bomb(gameScreen, sprite.getX(), sprite.getY()));
+                bombTimer = 0f;
+            }
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) && timer > shootCoolDown) {
@@ -158,7 +166,7 @@ public class Player extends Entity {
 
         for (int i = 0; i < xps.size; i++) {
             Xp x = xps.get(i);
-            if (sprite.getBoundingRectangle().overlaps(x.sprite.getBoundingRectangle())) {
+            if (bounds().overlaps(x.sprite.getBoundingRectangle())) {
                 gameScreen.upgradeSystem.xp += 15f;
                 xps.removeIndex(i);
                 i--;
@@ -167,7 +175,7 @@ public class Player extends Entity {
 
         for (int i = 0; i < hearts.size; i++) {
             Heart h = hearts.get(i);
-            if (sprite.getBoundingRectangle().overlaps(h.sprite.getBoundingRectangle())) {
+            if (bounds().overlaps(h.sprite.getBoundingRectangle())) {
                 hearts.removeIndex(i);
                 health += 30;
                 if (health > maxHealth) {
@@ -179,11 +187,26 @@ public class Player extends Entity {
 
         for (int i = 0; i < speedBuffs.size; i++) {
             SpeedBuff s = speedBuffs.get(i);
-            if (sprite.getBoundingRectangle().overlaps(s.sprite.getBoundingRectangle())) {
+            if (bounds().overlaps(s.sprite.getBoundingRectangle())) {
                 speedBuffs.removeIndex(i);
-                speed = 2500f;
+                speed = 150f;
                 sprite.setColor(Color.GREEN);
                 i--;
+                speedTimer +=Gdx.graphics.getDeltaTime();
+            }
+        }
+        if(speedTimer >= 15f) {
+            speed = 100f;
+            sprite.setColor(Color.WHITE);
+            timer = 0f;
+        }
+
+        if(!hasTakenDamage) {
+            for (Bomb b : bombs) {
+                if (b.rect.overlaps(bounds()) && b.exploded) {
+                    hasTakenDamage = true;
+                    health /= 2;
+                }
             }
         }
 

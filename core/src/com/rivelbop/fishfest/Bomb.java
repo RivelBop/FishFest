@@ -4,6 +4,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.Array;
 import com.rivelbop.fishfest.screen.GameScreen;
 
 public class Bomb {
@@ -12,6 +14,8 @@ public class Bomb {
     public float bombTimer;
     public boolean exploded;
     private GameScreen game;
+    public Rectangle rect;
+    public Explosion explosion;
 
     public Bomb(GameScreen game, float positionx, float positiony) {
         this.game = game;
@@ -20,6 +24,9 @@ public class Bomb {
         }
         sprite = new Sprite(texture);
         sprite.setPosition(positionx, positiony);
+        rect = new Rectangle(positionx - 100f / 2f, positiony - 100f / 2f ,100f, 100f);
+        explosion = new Explosion(sprite.getX(), sprite.getY());
+        explosion.effect.scaleEffect(0.2f);
     }
 
     public void update() {
@@ -30,10 +37,16 @@ public class Bomb {
             game.player.cameraShake.resetAndReconfigure(10f,10f,20f);
             game.player.cameraShake.startShaking();
         }
-
+        if(exploded) {
+            explosion.effect.update(Gdx.graphics.getDeltaTime());
+        }
     }
 
     public void render(SpriteBatch batch) {
-        sprite.draw(batch);
+        if(!exploded) {
+            sprite.draw(batch);
+        }
+        explosion.effect.draw(batch);
+
     }
 }

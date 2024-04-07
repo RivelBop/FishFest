@@ -1,6 +1,7 @@
 package com.rivelbop.fishfest.entity;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.rivelbop.fishfest.*;
 import com.rivelbop.fishfest.screen.GameScreen;
 
@@ -41,11 +42,16 @@ public abstract class Enemy extends Entity {
             if (FishFest.randomInt(1, 20) == 1) {
                 gameScreen.player.speedBuffs.add(new SpeedBuff(gameScreen, sprite.getX(), sprite.getY()));
             }
-
         }
     }
 
-    private void checkCollision() {
+    protected void checkCollision() {
+        for(Bomb b : gameScreen.player.bombs) {
+            if(b.rect.overlaps(sprite.getBoundingRectangle()) && b.exploded) {
+                health = 0;
+            }
+        }
+
         for (int i = 0; i < gameScreen.player.waves.size; i++) {
             Wave w = gameScreen.player.waves.get(i);
             if (w.sprite.getBoundingRectangle().overlaps(bounds())) {
@@ -56,11 +62,12 @@ public abstract class Enemy extends Entity {
             }
         }
 
-        if (!gameScreen.player.hasTakenDamage && gameScreen.player.sprite.getBoundingRectangle().overlaps(sprite.getBoundingRectangle())) {
+        if (!gameScreen.player.hasTakenDamage && gameScreen.player.bounds().overlaps(bounds())) {
             gameScreen.player.health -= damage;
             gameScreen.player.hasTakenDamage = true;
         }
     }
+
 
     @Override
     public abstract Enemy create(GameScreen game);

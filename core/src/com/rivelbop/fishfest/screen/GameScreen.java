@@ -1,6 +1,7 @@
 package com.rivelbop.fishfest.screen;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
@@ -11,9 +12,11 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.box2d.Box2D;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
+import com.rivelbop.fishfest.Bomb;
 import com.rivelbop.fishfest.DamageText;
 import com.rivelbop.fishfest.FishFest;
 import com.rivelbop.fishfest.Wave;
@@ -34,6 +37,7 @@ public class GameScreen implements Screen {
     public SpriteBatch spriteBatch, uiBatch;
     public Box2DDebugRenderer box2DRenderer;
     public ShapeBatch shapeRenderer;
+    public ShapeBatch testShapeRenderer;
 
     public World world;
     public OrthogonalMap map;
@@ -72,6 +76,7 @@ public class GameScreen implements Screen {
         uiBatch = new SpriteBatch();
         box2DRenderer = new Box2DDebugRenderer();
         shapeRenderer = new ShapeBatch();
+        testShapeRenderer = new ShapeBatch();
 
         world = new World(new Vector2(0f, 0f), true);
         map = new OrthogonalMap("MapThing.tmx");
@@ -81,7 +86,7 @@ public class GameScreen implements Screen {
         player = new Player(this);
         player.body.getBody().setTransform(200f, 200f, 0f);
         waveSystem = new WaveSystem(this);
-        textWave = new Font(Gdx.files.internal("font.ttf"), 25, Color.FOREST);
+        textWave = new Font(Gdx.files.internal("font.ttf"), 50, Color.BLUE);
 
         damageTexts = new Array<>();
     }
@@ -144,6 +149,7 @@ public class GameScreen implements Screen {
         shapeRenderer.rect(0f, 0f, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         shapeRenderer.end();
 
+
         spriteBatch.setProjectionMatrix(game.camera.combined);
         spriteBatch.begin();
         player.render(spriteBatch);
@@ -155,7 +161,7 @@ public class GameScreen implements Screen {
         
         uiBatch.begin();
         player.renderText(uiBatch);
-        textWave.drawCenter(uiBatch, "Wave: " + waveSystem.count, 50f, 50f);
+        textWave.drawCenter(uiBatch, "Wave: " + waveSystem.count, FishFest.WIDTH / 2f, 150f);
         spriteBox.draw(uiBatch);
         uiBatch.end();
 
@@ -198,5 +204,11 @@ public class GameScreen implements Screen {
         map.dispose();
 
         music.dispose();
+
+        Preferences save = Gdx.app.getPreferences("FishFestSave");
+        if(waveSystem.count > save.getInteger("highscore", 0)) {
+            save.putInteger("highscore", waveSystem.count);
+        }
+        save.flush();
     }
 }
