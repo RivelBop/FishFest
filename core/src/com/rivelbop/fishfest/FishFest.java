@@ -4,7 +4,10 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.utils.Scaling;
+import com.badlogic.gdx.utils.viewport.ScalingViewport;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import com.bitfire.postprocessing.PostProcessor;
 import com.bitfire.postprocessing.effects.*;
 import com.bitfire.postprocessing.filters.Combine;
@@ -16,18 +19,16 @@ import com.rivelbop.rivelworks.Utils;
 public class FishFest extends Game {
     public static final int HEIGHT = 720, WIDTH = HEIGHT * 16 / 9;
 
-    public StretchViewport viewport;
-    public OrthographicCamera camera;
+    public Viewport viewport;
     public AssetManager assets;
     public PostProcessor postProcessor;
 
     @Override
     public void create() {
-        // Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
-
-        camera = new OrthographicCamera();
-        viewport = new StretchViewport(WIDTH, HEIGHT, camera);
-        camera.update();
+        //camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        viewport = new ScalingViewport(Scaling.stretch, WIDTH, HEIGHT);
+        viewport.getCamera().update();
+        //camera.update();
 
         ShaderLoader.BasePath = "shaders/";
         postProcessor = new PostProcessor(false, false, false);
@@ -69,6 +70,9 @@ public class FishFest extends Game {
 
     @Override
     public void render() {
+        if(!Gdx.graphics.isFullscreen()) {
+            Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+        }
         Utils.clearScreen2D();
 
         postProcessor.capture();

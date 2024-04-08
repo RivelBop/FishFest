@@ -1,13 +1,20 @@
 package com.rivelbop.fishfest.entity;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.utils.Array;
 import com.rivelbop.fishfest.*;
 import com.rivelbop.fishfest.screen.GameScreen;
 
 public abstract class Enemy extends Entity {
+    private Sound enemyDamage;
+    private Sound healthTaken;
     public Enemy(GameScreen gameScreen) {
         super(gameScreen);
+        enemyDamage = Gdx.audio.newSound(Gdx.files.internal("damageTaken.wav"));
+        healthTaken = Gdx.audio.newSound(Gdx.files.internal("healthTaken.wav"));
+
     }
 
     @Override
@@ -39,9 +46,6 @@ public abstract class Enemy extends Entity {
                 gameScreen.player.hearts.add(new Heart(gameScreen, sprite.getX(), sprite.getY()));
             }
 
-            if (FishFest.randomInt(1, 20) == 1) {
-                gameScreen.player.speedBuffs.add(new SpeedBuff(gameScreen, sprite.getX(), sprite.getY()));
-            }
         }
     }
 
@@ -58,6 +62,7 @@ public abstract class Enemy extends Entity {
                 gameScreen.damageTexts.add(new DamageText(gameScreen.player.damage, w.sprite.getX(), w.sprite.getY()));
                 health -= gameScreen.player.damage;
                 gameScreen.player.waves.removeIndex(i);
+                enemyDamage.play();
                 i--;
             }
         }
@@ -65,6 +70,7 @@ public abstract class Enemy extends Entity {
         if (!gameScreen.player.hasTakenDamage && gameScreen.player.bounds().overlaps(bounds())) {
             gameScreen.player.health -= damage;
             gameScreen.player.hasTakenDamage = true;
+            healthTaken.play();
         }
     }
 

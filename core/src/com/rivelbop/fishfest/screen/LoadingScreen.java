@@ -4,6 +4,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGeneratorLoader;
@@ -24,9 +25,12 @@ public class LoadingScreen implements Screen {
 
     @Override
     public void show() {
-        game.camera.position.setZero();
-        game.camera.zoom = 1f;
+        game.viewport.getCamera().position.set(FishFest.WIDTH / 2f, FishFest.HEIGHT / 2f, 0f);
+        ((OrthographicCamera)game.viewport.getCamera()).zoom = 1f;
+        game.viewport.getCamera().update();
+        
         shapeBatch = new ShapeBatch();
+        shapeBatch.setProjectionMatrix(game.viewport.getCamera().combined);
 
         assets = game.assets;
         assets.setLoader(
@@ -59,7 +63,8 @@ public class LoadingScreen implements Screen {
 
     @Override
     public void render(float v) {
-        game.camera.update();
+        game.viewport.getCamera().update();
+
         shapeBatch.begin(ShapeRenderer.ShapeType.Filled);
 
         shapeBatch.setColor(Color.LIGHT_GRAY);

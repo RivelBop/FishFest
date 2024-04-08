@@ -43,7 +43,10 @@ public class UpgradeSystem {
         this.gameScreen = gameScreen;
 
         spriteBatch = new SpriteBatch();
+        spriteBatch.setProjectionMatrix(gameScreen.game.viewport.getCamera().combined);
+
         shapeBatch = new ShapeBatch();
+        shapeBatch.setProjectionMatrix(gameScreen.game.viewport.getCamera().combined);
 
         upgrades = new Upgrade[]{
                 new Upgrade("Surround Waves", gameScreen.game.assets.get("alldir.png", Texture.class)), // 0

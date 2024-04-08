@@ -1,6 +1,7 @@
 package com.rivelbop.fishfest;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -16,6 +17,8 @@ public class Bomb {
     private GameScreen game;
     public Rectangle rect;
     public Explosion explosion;
+    private Sound explosionSound;
+    private boolean soundPlayed;
 
     public Bomb(GameScreen game, float positionx, float positiony) {
         this.game = game;
@@ -27,6 +30,7 @@ public class Bomb {
         rect = new Rectangle(positionx - 100f / 2f, positiony - 100f / 2f ,100f, 100f);
         explosion = new Explosion(sprite.getX(), sprite.getY());
         explosion.effect.scaleEffect(0.2f);
+        explosionSound = Gdx.audio.newSound(Gdx.files.internal("explosion.wav"));
     }
 
     public void update() {
@@ -40,6 +44,12 @@ public class Bomb {
         if(exploded) {
             explosion.effect.update(Gdx.graphics.getDeltaTime());
         }
+        if(exploded && !soundPlayed) {
+            explosionSound.play();
+            soundPlayed = true;
+        }
+
+
     }
 
     public void render(SpriteBatch batch) {

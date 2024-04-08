@@ -10,7 +10,7 @@ import com.rivelbop.fishfest.screen.GameScreen;
 
 public class Octopus extends Enemy {
     private static Texture texture;
-    private Array<Ink> inks;
+    public Array<Ink> inks;
     private float timer;
     private final float DISTANCE_AWAY = 40f;
 
@@ -123,6 +123,32 @@ public class Octopus extends Enemy {
                     inks.removeIndex(i);
                     i--;
                 }
+            }
+        }
+
+        for (int i = 0; i < inks.size; i++) {
+            Ink n = inks.get(i);
+            if (n.sprite.getX() + n.sprite.getWidth() < gameScreen.game.viewport.getCamera().position.x - FishFest.WIDTH) {
+                inks.removeIndex(i);
+                i--;
+                continue;
+            }
+
+            if (n.sprite.getX() > gameScreen.game.viewport.getCamera().position.x + FishFest.WIDTH) {
+                inks.removeIndex(i);
+                i--;
+                continue;
+            }
+
+            if (n.sprite.getY() + n.sprite.getHeight() < gameScreen.game.viewport.getCamera().position.y - FishFest.HEIGHT) {
+                inks.removeIndex(i);
+                i--;
+                continue;
+            }
+
+            if (n.sprite.getY() > gameScreen.game.viewport.getCamera().position.y + FishFest.HEIGHT) {
+                inks.removeIndex(i);
+                i--;
             }
         }
     }

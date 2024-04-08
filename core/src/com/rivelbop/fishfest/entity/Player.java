@@ -24,6 +24,9 @@ public class Player extends Entity {
     public Array<Xp> xps;
     public Array<Heart> hearts;
     public Array<SpeedBuff> speedBuffs;
+    private Sound xpPickup;
+    private Sound heartPickup;
+    private Sound waterUpgrade;
 
     private float shootCoolDown = 1f;
     private float timer, damageTimer, timeShooterUpgrade, bombTimer, bombDetination, speedTimer;
@@ -37,10 +40,10 @@ public class Player extends Entity {
         maxHealth = 100;
         health = 100;
         damage = 15;
-        speed = 100000f;
+        speed = 100f;
 
         sprite = new Sprite(this.gameScreen.game.assets.get("goldfish.png", Texture.class));
-        cameraShake = new CameraShaker(gameScreen.game.camera, 5f, 5f, 10f);
+        cameraShake = new CameraShaker(gameScreen.game.viewport.getCamera(), 5f, 5f, 10f);
         healthText = new Font(Gdx.files.internal("Minecraft.ttf"), 35, Color.WHITE);
 
         waves = new Array<>();
@@ -55,6 +58,10 @@ public class Player extends Entity {
         }}, 0.1f, 0f, 0f);
         body.getBody().setFixedRotation(true);
         body.getBody().setUserData(sprite);
+
+        xpPickup = Gdx.audio.newSound(Gdx.files.internal("xpPickUp.wav"));
+        heartPickup = Gdx.audio.newSound(Gdx.files.internal("heartPickUp.wav"));
+        waterUpgrade = Gdx.audio.newSound(Gdx.files.internal("waterUpgrade.wav"));
     }
 
     @Override
@@ -123,8 +130,7 @@ public class Player extends Entity {
                 waves.add(new Wave(gameScreen, 3, sprite.getX(), sprite.getY(), upgrade));
                 waves.add(new Wave(gameScreen, 4, sprite.getX(), sprite.getY(), upgrade));
                 timeShooterUpgrade = 0f;
-                cameraShake.resetAndReconfigure(2f,2f,5f);
-                cameraShake.startShaking();
+                waterUpgrade.play();
             }
         }
 
@@ -169,6 +175,7 @@ public class Player extends Entity {
             if (bounds().overlaps(x.sprite.getBoundingRectangle())) {
                 gameScreen.upgradeSystem.xp += 15f;
                 xps.removeIndex(i);
+                xpPickup.play();
                 i--;
             }
         }
@@ -181,6 +188,7 @@ public class Player extends Entity {
                 if (health > maxHealth) {
                     health = maxHealth;
                 }
+                heartPickup.play();
                 i--;
             }
         }
