@@ -35,7 +35,7 @@ public class UpgradeSystem {
     private final SpriteBatch spriteBatch;
     private final ShapeBatch shapeBatch;
 
-    private int level = 1, xpLimit, currentSelection;
+    public int level = 1, xpLimit, currentSelection;
     private boolean justLeveledUp;
     public int xp;
 
@@ -126,7 +126,11 @@ public class UpgradeSystem {
                     } else {
                         spriteBatch.setColor(0f, 0f, 0f, 0.33f);
                     }
-                    spriteBatch.draw(t, WIDTH / 2f - t.getWidth() / 2f + i * t.getWidth(), HEIGHT / 2f - t.getHeight() / 2f);
+                    if(i == 0) {
+                        spriteBatch.draw(t, WIDTH / 2f - 96f - t.getWidth() / 2f, HEIGHT / 2f - t.getHeight() / 2f);
+                    } else {
+                        spriteBatch.draw(t, WIDTH / 2f + 96f - t.getWidth() / 2f, HEIGHT / 2f - t.getHeight() / 2f);
+                    }
                 }
                 spriteBatch.setColor(0f, 0f, 0f, 1f);
             }

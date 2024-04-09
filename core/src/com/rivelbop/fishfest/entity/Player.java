@@ -44,7 +44,7 @@ public class Player extends Entity {
 
         sprite = new Sprite(this.gameScreen.game.assets.get("goldfish.png", Texture.class));
         cameraShake = new CameraShaker(gameScreen.game.viewport.getCamera(), 5f, 5f, 10f);
-        healthText = new Font(Gdx.files.internal("Minecraft.ttf"), 35, Color.WHITE);
+        healthText = new Font(Gdx.files.internal("font.ttf"), 35, Color.WHITE);
 
         waves = new Array<>();
         bombs = new Array<>();
@@ -70,8 +70,6 @@ public class Player extends Entity {
     }
 
     public void update() {
-        System.out.println(body.getBody().getLinearVelocity());
-        System.out.println(bombs.size);
         timer += Gdx.graphics.getDeltaTime();
 
         body.getBody().setLinearVelocity(0f, 0f);
@@ -261,7 +259,7 @@ public class Player extends Entity {
     }
 
     public void renderText(SpriteBatch batch) {
-        healthText.drawCenter(batch, "Health: " + health, 300f, 665f);
+        healthText.drawCenter(batch, "Health: " + health, 300f, 690f);
     }
 
     public void isColliding(Entity entity) {

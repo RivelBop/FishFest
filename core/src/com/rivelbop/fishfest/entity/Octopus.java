@@ -1,6 +1,7 @@
 package com.rivelbop.fishfest.entity;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -13,6 +14,7 @@ public class Octopus extends Enemy {
     public Array<Ink> inks;
     private float timer;
     private final float DISTANCE_AWAY = 40f;
+    private Sound hit;
 
     public Octopus(GameScreen gameScreen) {
         super(gameScreen);
@@ -26,6 +28,7 @@ public class Octopus extends Enemy {
             texture = this.gameScreen.game.assets.get("Octopus.png", Texture.class);
         }
         sprite = new Sprite(texture);
+        hit = Gdx.audio.newSound(Gdx.files.internal("healthTaken.wav"));
     }
 
     @Override
@@ -118,7 +121,7 @@ public class Octopus extends Enemy {
                 Ink n = inks.get(i);
                 if (n.sprite.getBoundingRectangle().overlaps(gameScreen.player.bounds())){
                     gameScreen.player.health -= damage;
-                    gameScreen.player.speed = 1000f;
+                    hit.play();
                     gameScreen.player.hasTakenDamage = true;
                     inks.removeIndex(i);
                     i--;

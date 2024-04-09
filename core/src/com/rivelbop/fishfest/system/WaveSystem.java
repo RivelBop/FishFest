@@ -50,7 +50,7 @@ public class WaveSystem {
 
                 enemy.speed += randomInt(-15, 15);
                 do {
-                    enemy.sprite.setPosition(randomInt(-1000, 1000), randomInt(-1000, 1000));
+                    enemy.sprite.setPosition(randomInt(-850, 850), randomInt(-850, 850));
                 } while (enemy.bounds().overlaps(gameScreen.player.bounds()));
                 currentEnemies.add(enemy);
             }

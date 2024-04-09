@@ -22,6 +22,7 @@ import com.rivelbop.fishfest.Bomb;
 import com.rivelbop.fishfest.DamageText;
 import com.rivelbop.fishfest.FishFest;
 import com.rivelbop.fishfest.Wave;
+import com.rivelbop.fishfest.entity.Octopus;
 import com.rivelbop.fishfest.entity.Player;
 import com.rivelbop.fishfest.system.UpgradeSystem;
 import com.rivelbop.fishfest.system.WaveSystem;
@@ -47,7 +48,7 @@ public class GameScreen implements Screen {
     public UpgradeSystem upgradeSystem;
     public Player player;
     public WaveSystem waveSystem;
-    public Font textWave;
+    public Font textWave, xpText;
 
     public Sprite spriteBox;
     public Interpolator fadeOut, fadeIn;
@@ -99,12 +100,14 @@ public class GameScreen implements Screen {
         player.body.getBody().setTransform(300f, 200f, 0f);
         waveSystem = new WaveSystem(this);
         textWave = new Font(Gdx.files.internal("font.ttf"), 50, Color.BLUE);
+        xpText = new Font(Gdx.files.internal("font.ttf"), 25, Color.YELLOW);
 
         damageTexts = new Array<>();
     }
 
     @Override
     public void render(float v) {
+
         spriteBox.setAlpha(1f - fadeOut.update());
         if (isDead) {
             spriteBox.setAlpha(fadeIn.update());
@@ -165,12 +168,6 @@ public class GameScreen implements Screen {
         mapBackground.render((OrthographicCamera) game.viewport.getCamera());
         map.render((OrthographicCamera) game.viewport.getCamera());
 
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        player.renderBar();
-        shapeRenderer.setColor(0f, 0f, 0.7f, 0.4f);
-        shapeRenderer.rect(0f, 0f, FishFest.WIDTH, FishFest.HEIGHT);
-        shapeRenderer.end();
-
         spriteBatch.setProjectionMatrix(game.viewport.getCamera().combined);
         spriteBatch.begin();
         player.render(spriteBatch);
@@ -179,10 +176,21 @@ public class GameScreen implements Screen {
             t.render(spriteBatch);
         }
         spriteBatch.end();
-        
+
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        player.renderBar();
+        shapeRenderer.setColor(0f, 0f, 1f, 0.1f);
+        shapeRenderer.rect(0f, 0f, FishFest.WIDTH, FishFest.HEIGHT);
+        shapeRenderer.setColor(Color.GRAY);
+        shapeRenderer.rect(50f, 550f, 500f, 50f);
+        shapeRenderer.setColor(Color.BLUE);
+        shapeRenderer.rect(50f, 550f, 500f * upgradeSystem.xp / upgradeSystem.xpLimit, 50f);
+        shapeRenderer.end();
+
         uiBatch.begin();
         player.renderText(uiBatch);
         textWave.drawCenter(uiBatch, "Wave: " + waveSystem.count, FishFest.WIDTH / 2f, 150f);
+        xpText.drawCenter(uiBatch, "Xp: " + upgradeSystem.xp, 300f, 615);
         spriteBox.draw(uiBatch);
         if(isPaused) {
             textWave.drawCenter(uiBatch, "PAUSED", FishFest.WIDTH / 2f, FishFest.HEIGHT / 2f + 100f);

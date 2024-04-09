@@ -12,7 +12,7 @@ public class EelFish extends Enemy {
         maxHealth = 25;
         health = 25;
         damage = 10;
-        speed = 200f;
+        speed = 120f;
 
         if(texture == null) {
             texture = this.gameScreen.game.assets.get("EelFish.png", Texture.class);

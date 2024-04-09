@@ -12,7 +12,7 @@ public class Lobster extends Enemy {
         maxHealth = 50;
         health = 50;
         damage = 50;
-        speed = 30f;
+        speed = 70f;
 
         if(texture == null) {
             texture = this.gameScreen.game.assets.get("Lobster.png", Texture.class);

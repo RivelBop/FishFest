@@ -40,8 +40,9 @@ public abstract class Enemy extends Entity {
         checkCollision();
 
         if (health <= 0) {
-            gameScreen.player.xps.add(new Xp(gameScreen, sprite.getX(), sprite.getY()));
-
+            if(FishFest.randomInt(1,2) == 1) {
+                gameScreen.player.xps.add(new Xp(gameScreen, sprite.getX(), sprite.getY()));
+            }
             if (FishFest.randomInt(1, 6) == 1) {
                 gameScreen.player.hearts.add(new Heart(gameScreen, sprite.getX(), sprite.getY()));
             }
